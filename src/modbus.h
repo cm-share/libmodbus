@@ -229,7 +229,12 @@ MODBUS_API const char *modbus_strerror(int errnum);
 MODBUS_API int modbus_read_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest);
 MODBUS_API int modbus_read_input_bits(modbus_t *ctx, int addr, int nb, uint8_t *dest);
 MODBUS_API int modbus_read_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest);
-MODBUS_API int modbus_user_fc_function(modbus_t *ctx);
+/******************************************************************************/
+void modbus_custom_packet_init(modbus_t* ctx, int fc, 
+                               uint8_t tx_size, uint8_t rx_size,
+                               uint8_t* tx_frame, uint8_t* rx_frame);
+int modbus_user_fc_function(modbus_t *ctx);
+/******************************************************************************/
 MODBUS_API int
 modbus_read_input_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest);
 MODBUS_API int modbus_write_bit(modbus_t *ctx, int coil_addr, int status);

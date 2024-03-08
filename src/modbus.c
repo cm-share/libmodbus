@@ -41,7 +41,7 @@ typedef enum {
 } _step_t;
 /****************************Global variable***********************************/
 
-mb_packet_t gMb_Packet;
+static mb_packet_t gMb_Packet;
 
 /******************************************************************************/
 const char *modbus_strerror(int errnum)
@@ -157,9 +157,9 @@ static unsigned int compute_response_length_from_request(modbus_t *ctx, uint8_t 
         length = 7;
         break;
     default:
-    /**************************************************************************/
+    //**************************************************************************
         length = gMb_Packet.rx_pdu_length + 1;
-    /**************************************************************************/
+    //**************************************************************************
     }
 
     return offset + length + ctx->backend->checksum_length;
@@ -295,7 +295,9 @@ static uint8_t compute_meta_length_after_function(int function, msg_type_t msg_t
             length = 6;
             break;
         default:
+        /**********************************************************************/
             length = gMb_Packet.rx_pdu_length;
+        /**********************************************************************/
         }
     }
 
@@ -1317,6 +1319,12 @@ static int read_registers(modbus_t *ctx, int function, int addr, int nb, uint16_
     return rc;
 }
 //******************************************************************************
+/**
+ * @brief 
+ * 
+ * @param ctx 
+ * @return int 
+ */
 static int user_rdwt_register(modbus_t *ctx)
 {
     int rc;
@@ -1332,17 +1340,15 @@ static int user_rdwt_register(modbus_t *ctx)
     }
 
     rc = send_msg(ctx, req, (req_length + gMb_Packet.tx_pdu_length));
-    printf("start send message\n");
+    
     if (rc > 0) {
         int i;
 
         rc = _modbus_receive_msg(ctx, rsp, MSG_CONFIRMATION);
-        //**********************************************************************
         for (i = 0; i < (gMb_Packet.rx_pdu_length + 4); i++)
         {
             gMb_Packet.rx_frame[i] = rsp[i];
         }
-        //**********************************************************************
         if (rc == -1)
             return -1;
 
@@ -1404,6 +1410,27 @@ int modbus_read_input_registers(modbus_t *ctx, int addr, int nb, uint16_t *dest)
     return status;
 }
 //******************************************************************************
+/**
+ * @brief Initialization of information used in Custom Function Code packets
+ * 
+ * @param [in] ctx               modbus handler
+ * @param [in] fc               function code
+ * @param [in] tx_size          tx pdu buffer length
+ * @param [in] rx_size          rx pdu buffer length
+ * @param [in] tx_frame         tx pdu buffer
+ * @param [in] rx_frame         rx pdu buffer
+ */
+void modbus_custom_packet_init(modbus_t* ctx, int fc, 
+                               uint8_t tx_size, uint8_t rx_size,
+                               uint8_t* tx_frame, uint8_t* rx_frame)
+{
+    gMb_Packet.slave_id = modbus_get_slave(ctx);
+    gMb_Packet.fc = fc;
+    gMb_Packet.tx_pdu_length = tx_size;
+    gMb_Packet.rx_pdu_length = rx_size;
+    gMb_Packet.tx_frame = tx_frame;
+    gMb_Packet.rx_frame = rx_frame;
+}
 /**
  * @brief Function used in custom function code
  * 
