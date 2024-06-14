@@ -158,7 +158,17 @@ static unsigned int compute_response_length_from_request(modbus_t *ctx, uint8_t 
         break;
     default:
     //**************************************************************************
-        length = gMb_Packet.rx_pdu_length + 1;
+        if ((MODBUS_FC_WRITE_SINGLE_COIL == req[offset]) ||
+            (MODBUS_FC_WRITE_SINGLE_REGISTER == req[offset]) ||
+            (MODBUS_FC_WRITE_MULTIPLE_COILS == req[offset]) ||
+            (MODBUS_FC_WRITE_MULTIPLE_REGISTERS == req[offset]))
+        {
+            length = 5;
+        }
+        else
+        {
+            length = gMb_Packet.rx_pdu_length + 1;
+        }
     //**************************************************************************
     }
 
@@ -296,7 +306,20 @@ static uint8_t compute_meta_length_after_function(int function, msg_type_t msg_t
             break;
         default:
         /**********************************************************************/
-            length = gMb_Packet.rx_pdu_length;
+            if ((MODBUS_FC_READ_COILS == function) || 
+                (MODBUS_FC_READ_DISCRETE_INPUTS == function) ||
+                (MODBUS_FC_READ_HOLDING_REGISTERS == function) ||
+                (MODBUS_FC_READ_INPUT_REGISTERS == function) ||
+                (MODBUS_FC_READ_EXCEPTION_STATUS == function) ||
+                (MODBUS_FC_REPORT_SLAVE_ID == function))
+            {
+                length = 1;
+            }
+            else
+            {
+                length = gMb_Packet.rx_pdu_length;
+            }
+            
         /**********************************************************************/
         }
     }
